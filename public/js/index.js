@@ -14,7 +14,88 @@ socket.on('newEmail', function(email){
    // console.log(new Date(email.created_at).toDateString());
 });
 
-socket.on('newMessage', function(message){
-    console.log('newMessage',message);
+socket.on('admin', function(message){
+    console.log(message.text);
 });
 
+socket.on('newMessage', function(message){
+    var formattedTime = moment(message.createdAt).format('h:mm a');
+    var template = $('#message-template').html();
+    var html = Mustache.render(template, {
+        text: message.text,
+        from: message.from,
+        createdAt: formattedTime
+    });
+
+    $('#messages').append(html);
+        
+    // var formattedTime = moment(message.createdAt).format('h:mm a');
+    // console.log('newMessage',message);
+    // var li = $('<li></li>');
+    // li.text(`${message.from} ${formattedTime}: ${message.text}`);
+
+    // $('#messages').append(li);
+});
+
+socket.on('newLocationMessage', (location) => {
+    var formattedTime = moment(location.createdAt).format('h:mm a');
+    var template = $('#location-message-template').html();
+
+    var html = Mustache.render(template, {
+        from: location.from,
+        url: location.url,
+        createdAt: formattedTime
+    });
+
+    $('#messages').append(html);
+
+    // console.log(location);
+    // var formattedTime = moment(location.createdAt).format('h:mm a');
+    // var li = $('<li></li>');
+    // var a = $(`<a target="_blank">Link to my location</a>`);
+
+    // li.text(`${location.from} ${formattedTime}: `);
+    // a.attr('href',location.url);
+    // li.append(a);
+    // $('#messages').append(li);
+});
+
+
+$('#message-form').on('submit',function(e){
+    e.preventDefault();
+    //var text = ($(this)[0][0]).value;
+    var text = $('[name=message]');
+   
+    socket.emit('createMessage', {
+        from: 'User',
+        text: text.val()
+    }, function(){
+        text.val('');
+    });
+});
+
+var locationButton = $('#send-location');
+locationButton.on('click', () => {
+        
+    locationButton.attr('disabled', 'disabled');
+    locationButton.text('Sending Location...');
+
+    if (!navigator.geolocation) {
+        return alert('Geolocation not supported by your browser.');
+    }
+
+    navigator.geolocation.getCurrentPosition(function(position){
+        console.log(position.coords);
+        socket.emit('createLocationMessage', {
+            lat: position.coords.latitude,
+            long: position.coords.longitude
+        }, function () {
+            console.log('callback geolocation');
+            locationButton.attr('disabled', false);
+            locationButton.text('Send Location');
+        });
+    }, function() {
+        alert('Unable to fetch location.');
+    });
+
+});
