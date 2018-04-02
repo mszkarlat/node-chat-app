@@ -1,4 +1,6 @@
-var socket = io('http://localhost:3000');
+var socket = io();
+//var socket = io('https://node-course2-chat-app.herokuapp.com');
+
 
 function scrollToBottom(){
     // Selectors

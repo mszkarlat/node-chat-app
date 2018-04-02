@@ -8,7 +8,7 @@ const {isRealString} = require('./utils/validation');
 const {ChatRoom} = require('./utils/ChatRoom');
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 let server = http.createServer(app);
 let io = socketIO(server);
 let room = new ChatRoom();
