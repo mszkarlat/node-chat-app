@@ -61,6 +61,15 @@ socket.on('newMessage', function(message){
     // $('#messages').append(li);
 });
 
+socket.on('updateUserList', function(users) {
+    var template = $('#person-list-template').html();
+
+    var html = Mustache.render(template, {
+        users
+    });
+    $('#users').html(html); 
+});
+
 socket.on('newLocationMessage', (location) => {
     var formattedTime = moment(location.createdAt).format('h:mm a');
     var template = $('#location-message-template').html();
@@ -91,7 +100,6 @@ $('#message-form').on('submit',function(e){
     var text = $('[name=message]');
    
     socket.emit('createMessage', {
-        from: 'User',
         text: text.val()
     }, function(){
         text.val('');
